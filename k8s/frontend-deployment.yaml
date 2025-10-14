@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: floatchat-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: floatchat-frontend
+  template:
+    metadata:
+      labels:
+        app: floatchat-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: your-docker-registry/floatchat-frontend:latest
+        ports:
+        - containerPort: 8501

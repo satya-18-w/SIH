@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: floatchat-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: floatchat-backend
+  template:
+    metadata:
+      labels:
+        app: floatchat-backend
+    spec:
+      containers:
+      - name: backend
+        image: your-docker-registry/floatchat-backend:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: floatchat-secrets
