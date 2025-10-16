@@ -5,7 +5,7 @@ from geoalchemy2 import Geometry
 
 Base = declarative_base()
 
-class Float(Base):
+class ArgoFloat(Base):
     __tablename__ = "floats"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -13,7 +13,7 @@ class Float(Base):
     deployment_date = Column(DateTime)
     platform_type = Column(String)
 
-    profiles = relationship("Profile", back_populates="float")
+    profiles = relationship("Profile", back_populates="argo_float")
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -25,7 +25,7 @@ class Profile(Base):
     location = Column(Geometry(geometry_type='POINT', srid=4326))
     profile_summary = Column(String)
 
-    float = relationship("Float", back_populates="profiles")
+    argo_float = relationship("ArgoFloat", back_populates="profiles")
     observations = relationship("Observation", back_populates="profile")
 
 class Observation(Base):

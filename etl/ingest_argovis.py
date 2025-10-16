@@ -3,10 +3,10 @@ import pandas as pd
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
 from app.db.session import engine
-from app.db.models import Base, Float, Profile, Observation
+from app.db.models import Base, ArgoFloat, Profile, Observation
 from app.services.vector_db_adapter import VectorDBAdapter
 
-ARGOVIS_API_URL = "https://argovis.colorado.edu"
+ARGOVIS_API_URL = "https://argovis-api.colorado.edu"
 
 def get_db_session():
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)()
@@ -19,24 +19,21 @@ def ingest_data(days_to_backfill: int = 1):
     db = get_db_session()
     vector_db = VectorDBAdapter()
 
-    # Create tables if they don't exist
-    Base.metadata.create_all(bind=engine)
-
     # Fetch profiles from the last 24 hours
     try:
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=days_to_backfill)
-        response = requests.get(f"{ARGOVIS_API_URL}/profiles?startDate={start_date.isoformat()}Z&endDate={end_date.isoformat()}Z")
+        response = requests.get(f"{ARGOVIS_API_URL}/argo?startDate={start_date.isoformat()}Z&endDate={end_date.isoformat()}Z")
         response.raise_for_status()
         profiles_data = response.json()
 
         for profile in profiles_data:
-            wmo_number = int(profile['platform_number'])
+            wmo_number = int(profile['_id'].split('_')[0])
 
             # Create or get float
-            float_obj = db.query(Float).filter_by(wmo_number=wmo_number).first()
+            float_obj = db.query(ArgoFloat).filter_by(wmo_number=wmo_number).first()
             if not float_obj:
-                float_obj = Float(
+                float_obj = ArgoFloat(
                     wmo_number=wmo_number,
                     platform_type=profile.get('platform_type')
                 )
@@ -44,7 +41,7 @@ def ingest_data(days_to_backfill: int = 1):
                 db.commit()
 
             # Create profile
-            profile_summary = f"Profile from float {wmo_number} at {profile['timestamp']}. Mean temp: {profile['bgcMeas'][0].get('temp') if profile.get('bgcMeas') else 'N/A'}"
+            profile_summary = f"Profile from float {wmo_number} at {profile['timestamp']}. Mean temp: {profile['bgcMeas'][0].get('temp') if profile.get('bgcMeas') and len(profile['bgcMeas']) > 0 else 'N/A'}"
             profile_obj = Profile(
                 float_id=float_obj.id,
                 cycle_number=profile['cycle_number'],

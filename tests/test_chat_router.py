@@ -1,11 +1,12 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.rag import RagService
+from app.routers.chat import get_rag_service
 from unittest.mock import MagicMock
 
 client = TestClient(app)
 
-def test_chat_endpoint(mocker):
+def test_chat_endpoint():
     # Mock the RagService
     mock_rag_service = MagicMock(spec=RagService)
     mock_rag_service.process_query.return_value = {
@@ -16,7 +17,7 @@ def test_chat_endpoint(mocker):
     }
     
     # Dependency override
-    app.dependency_overrides[RagService] = lambda: mock_rag_service
+    app.dependency_overrides[get_rag_service] = lambda: mock_rag_service
 
     response = client.post(
         "/api/chat",

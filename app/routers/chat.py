@@ -11,13 +11,15 @@ class ChatRequest(BaseModel):
     session_id: str
     message: str
 
+def get_rag_service(db: Session = Depends(get_db)):
+    return RagService(db=db)
+
 @router.post("/chat")
-def chat(request: ChatRequest, db: Session = Depends(get_db)):
+def chat(request: ChatRequest, rag_service: RagService = Depends(get_rag_service)):
     """
     Handles chat requests.
     """
     try:
-        rag_service = RagService(db=db)
         response = rag_service.process_query(request.message)
         return response
     except Exception as e:

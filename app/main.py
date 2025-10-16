@@ -3,7 +3,7 @@ from app.routers import chat, ingest
 from app.core.config import settings
 
 from app.core.scheduler import start_scheduler
-from app.db.init_db import initial_data_load
+from app.db.init_db import create_db_and_tables
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -13,7 +13,7 @@ app = FastAPI(
 
 @app.on_event("startup")
 def startup_event():
-    initial_data_load()
+    create_db_and_tables()
     start_scheduler()
 
 

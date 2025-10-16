@@ -1,18 +1,19 @@
 import os
-import chromadb
 from app.core.config import settings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores.chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 
 class VectorDBAdapter:
     def __init__(self):
         os.environ["GOOGLE_API_KEY"] = settings.GOOGLE_API_KEY
-        self.client = chromadb.HttpClient(host=settings.CHROMA_HOST, port=settings.CHROMA_PORT)
+        os.environ["PINECONE_API_KEY"] = settings.PINECONE_API_KEY
+        
+        self.pinecone = Pinecone(api_key=settings.PINECONE_API_KEY, environment=settings.PINECONE_ENVIRONMENT)
         self.embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        self.vector_store = Chroma(
-            client=self.client,
-            collection_name=settings.VECTOR_DB_COLLECTION,
-            embedding_function=self.embedding_function,
+        self.vector_store = PineconeVectorStore.from_existing_index(
+            index_name=settings.PINECONE_INDEX_NAME,
+            embedding=self.embedding_function
         )
 
     def upsert(self, docs, metadatas, ids):

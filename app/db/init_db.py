@@ -1,20 +1,8 @@
-from sqlalchemy.orm import Session
-from app.db.session import SessionLocal
-from app.db.models import Profile
-from etl.ingest_argovis import ingest_data
+from app.db.session import engine
+from app.db.models import Base
 
-def initial_data_load():
+def create_db_and_tables():
     """
-    Checks if the database is empty and performs an initial data load if it is.
+    Creates the database and all tables.
     """
-    db = SessionLocal()
-    try:
-        # Check if there is any data in the Profile table
-        if db.query(Profile).count() == 0:
-            print("No data found in the database. Performing initial data load for the last 30 days...")
-            ingest_data(days_to_backfill=30)
-            print("Initial data load complete.")
-        else:
-            print("Database already contains data. Skipping initial data load.")
-    finally:
-        db.close()
+    Base.metadata.create_all(bind=engine)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks
-from etl.ingest_netcdf import ingest_data
+from etl.ingest_argovis import ingest_data
 
 router = APIRouter()
 
