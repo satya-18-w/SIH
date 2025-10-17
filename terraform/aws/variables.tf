@@ -14,3 +14,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_ips" {
+  description = "A list of IP addresses allowed to access the database."
+  type        = list(string)
+  default     = ["0.0.0.0/0"] # WARNING: This allows access from any IP address. Replace with your IP address.
+}
